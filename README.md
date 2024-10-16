@@ -1,96 +1,321 @@
-# Obsidian Sample Plugin
+# GitHub Repo Notes Plugin for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/anpigon/obsidian-book-search-plugin/release.yml?logo=github)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/anpigon/obsidian-book-search-plugin?sort=semver)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/anpigon/obsidian-book-search-plugin/total)
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+An Obsidian plugin that creates notes from GitHub repository URLs by fetching repository data and README content, then generating notes based on a customizable template.
 
-**Note:** The Obsidian API is still in early alpha and is subject to change at any time!
+## Table of Contents
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- [Features](#features)
+- [Installation](#installation)
+  - [Manual Installation](#manual-installation)
+- [Configuration](#configuration)
+  - [Plugin Settings](#plugin-settings)
+  - [Template Customization](#template-customization)
+- [Usage](#usage)
+  - [Creating a GitHub Repository Note](#creating-a-github-repository-note)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+  - [Building from Source](#building-from-source)
+  - [Contributing](#contributing)
+- [License](#license)
 
-## First time developing plugins?
+---
 
-Quick starting guide for new plugin devs:
+## Features
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+- **Create Notes from GitHub Repositories**: Generate comprehensive notes by entering a GitHub repository URL.
+- **Fetch Repository Metadata**: Automatically includes repository name, owner, description, language, license, and more.
+- **Include README Content**: Fetches and embeds the repository's README file into your note.
+- **Customizable Templates**: Use placeholders in a template file to define the structure and content of your notes.
+- **Auto-Complete in Settings**: Provides auto-completion for folder paths and template files in plugin settings.
+- **Ribbon Icon and Command Palette Access**: Easily access the plugin via a sidebar icon or the command palette.
+- **Automatic Note Opening**: Option to automatically open the newly created note.
 
-## Releasing new releases
+## Installation
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### Manual Installation
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+1. **Download or Clone the Repository**
 
-## Adding your plugin to the community plugin list
+   - Download the plugin files or clone the repository:
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+     ```bash
+     git clone https://github.com/yourusername/github-repo-notes.git
+     ```
 
-## How to use
+2. **Install Dependencies**
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+   - Navigate to the plugin directory:
 
-## Manually installing the plugin
+     ```bash
+     cd github-repo-notes
+     ```
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+   - Install the necessary dependencies:
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
+     ```bash
+     npm install
+     ```
 
-## Funding URL
+3. **Build the Plugin**
 
-You can include funding URLs where people who use your plugin can financially support it.
+   - Build the plugin by running:
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+     ```bash
+     npm run build
+     ```
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+     This will generate the `main.js` and other necessary files.
+
+4. **Copy Files to Obsidian Plugins Folder**
+
+   - Locate your Obsidian vault directory.
+   - Navigate to `.obsidian/plugins` within your vault.
+   - Create a new folder named `github-repo-notes`.
+   - Copy the following files into this folder:
+
+     - `manifest.json`
+     - `main.js`
+     - `styles.css` (if available)
+
+5. **Enable the Plugin in Obsidian**
+
+   - Open Obsidian.
+   - Go to `Settings` > `Community Plugins`.
+   - Disable `Safe Mode` if it's enabled.
+   - Click on `Installed Plugins` and enable **GitHub Repo Notes Plugin**.
+
+## Configuration
+
+### Plugin Settings
+
+After enabling the plugin, configure it by navigating to `Settings` > `GitHub Repo Notes Plugin`.
+
+- **GitHub Personal Access Token**
+
+  - Enter your GitHub token to access private repositories and increase API rate limits.
+  - [How to create a GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
+
+- **New File Location**
+
+  - Specify the folder where new notes will be created.
+  - Use the auto-complete feature to select an existing folder.
+
+- **New File Name**
+
+  - Define the file name for new notes.
+  - Use placeholders like `{{repo_name}}` and `{{owner}}`.
+
+- **Template File**
+
+  - Specify the path to your template file.
+  - Use the auto-complete feature to select an existing file.
+
+- **Open New Repo Note**
+
+  - Toggle whether to automatically open the new note after creation.
+
+### Template Customization
+
+The plugin uses a template file to generate notes. You can customize this template to fit your needs. The following placeholders are available:
+
+- `{{repo_name}}`
+- `{{owner}}`
+- `{{description}}`
+- `{{language}}`
+- `{{license}}`
+- `{{repo_url}}`
+- `{{created_at}}`
+- `{{default_branch}}`
+- `{{readme_content}}`
+
+#### Example Template (`repo-template.md`)
+
+Place this file in your vault at the path specified in the plugin settings.
+
+```markdown
+---
+tags:
+  - type/code-repository
+title: "{{repo_name}}"
+created_by: "[[{{owner}}]]"
+license: "{{license}}"
+repository_link: "{{repo_url}}"
+language: "{{language}}"
+default_branch: "{{default_branch}}"
+created_at: "{{created_at}}"
+template_type: Code Repository
+template_version: "1.0"
+---
+
+# {{repo_name}}
+
+by [[{{owner}}]]
+
+## Summary
+
+> [!summary]
+{{description}}
+
+## Features
+
+- 
+
+## Installation
+
+- 
+
+## Usage
+
+- 
+
+## Contributors
+
+- 
+
+## README
+
+{{readme_content}}
+
+## Known Issues
+
+- 
+
+## Future Development
+
+- 
+
+---
+
+# Back Matter
+
+**Source**
+
+- [{{repo_url}}]({{repo_url}})
+
+**References**
+
+- 
+
+**Tasks**
+
+- 
+
+**Questions**
+
+- 
 ```
 
-If you have multiple URLs, you can also do:
+## Usage
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+### Creating a GitHub Repository Note
 
-## API Documentation
+You can create a new note from a GitHub repository URL using either the ribbon icon or the command palette.
 
-See https://github.com/obsidianmd/obsidian-api
+#### **Using the Ribbon Icon**
+
+- Click the **GitHub Pull Request** icon in the Obsidian sidebar.
+- A modal dialog will appear prompting you to enter a GitHub repository URL.
+
+#### **Using the Command Palette**
+
+- Press `Ctrl+P` (or `Cmd+P` on macOS) to open the command palette.
+- Type `Create GitHub Repository Note` and select the command.
+
+#### **Steps**
+
+1. **Enter the Repository URL**
+
+   - Example: `https://github.com/obsidianmd/obsidian-releases`
+
+2. **Submit**
+
+   - Press `Enter` or click the **Create Note** button.
+
+3. **Note Generation**
+
+   - The plugin fetches repository data and the README content.
+   - A new note is created based on your template.
+   - The note is saved in the specified folder with the defined file name.
+   - If enabled, the new note opens automatically.
+
+## Troubleshooting
+
+- **Invalid GitHub Repository URL**
+
+  - Ensure the URL is in the correct format: `https://github.com/owner/repository`
+
+- **API Rate Limits Exceeded**
+
+  - Without a GitHub token, you're limited to 60 requests per hour.
+  - Generate and add a GitHub Personal Access Token in the plugin settings.
+
+- **Template Placeholders Not Replaced**
+
+  - Check that your template uses the correct placeholders.
+  - Placeholders are case-sensitive and must match exactly.
+
+- **README Content Not Displayed**
+
+  - The repository may not have a README file.
+  - The plugin will leave the `{{readme_content}}` placeholder empty if no README is found.
+
+- **Auto-Complete Not Working in Settings**
+
+  - Ensure you've updated the plugin to the latest version.
+  - If issues persist, restart Obsidian.
+
+## Development
+
+### Building from Source
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/yourusername/github-repo-notes.git
+   ```
+
+2. **Navigate to the Plugin Directory**
+
+   ```bash
+   cd github-repo-notes
+   ```
+
+3. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+4. **Build the Plugin**
+
+   ```bash
+   npm run build
+   ```
+
+5. **Copy Files to Obsidian**
+
+   - Follow the [Manual Installation](#manual-installation) steps.
+
+### Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request on GitHub.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+**Note**: Replace `https://github.com/yourusername/github-repo-notes.git` with the actual URL of your plugin's repository.
+
+**Optional Enhancements**:
+
+- Add screenshots to demonstrate usage (place images in the repository and reference them in the README).
+- Provide more detailed troubleshooting steps based on user feedback.
+- Include a changelog or roadmap section if you plan to update the plugin regularly.
+
+**Important**: Ensure that all placeholders in your template match those used in the plugin code. Test the plugin thoroughly to confirm that it functions as expected.

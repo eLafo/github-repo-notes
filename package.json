@@ -1,5 +1,5 @@
 {
-	"name": "obsidian-githumb-repo-note",
+	"name": "github-repo-notes",
 	"version": "1.0.0",
 	"description": "A plugin to import github repos as notes in obsidian",
 	"main": "main.js",

@@ -25,7 +25,7 @@ export default class GitHubRepoNotesPlugin extends Plugin {
 
     // Add command to activate the plugin
     this.addCommand({
-      id: 'create-github-repo-note',
+      id: 'create-github-repo-notes',
       name: 'Create GitHub Repository Note',
       callback: () => {
         new RepoUrlModal(this.app, this.settings, this).open();
