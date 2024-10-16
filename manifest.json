@@ -3,7 +3,7 @@
 	"name": "GitHub Repo Notes",
 	"version": "1.0.0",
 	"minAppVersion": "0.12.0",
-	"description": "An Obsidian plugin to create notes from GitHub repository URLs.",
+	"description": "A plugin to create notes from GitHub repository URLs.",
 	"author": "eLafo",
 	"authorUrl": "https://elafo.me]",
 	"isDesktopOnly": false
