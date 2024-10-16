@@ -34,60 +34,6 @@ An Obsidian plugin that creates notes from GitHub repository URLs by fetching re
 - **Ribbon Icon and Command Palette Access**: Easily access the plugin via a sidebar icon or the command palette.
 - **Automatic Note Opening**: Option to automatically open the newly created note.
 
-## Installation
-
-### Manual Installation
-
-1. **Download or Clone the Repository**
-
-   - Download the plugin files or clone the repository:
-
-     ```bash
-     git clone https://github.com/yourusername/github-repo-notes.git
-     ```
-
-2. **Install Dependencies**
-
-   - Navigate to the plugin directory:
-
-     ```bash
-     cd github-repo-notes
-     ```
-
-   - Install the necessary dependencies:
-
-     ```bash
-     npm install
-     ```
-
-3. **Build the Plugin**
-
-   - Build the plugin by running:
-
-     ```bash
-     npm run build
-     ```
-
-     This will generate the `main.js` and other necessary files.
-
-4. **Copy Files to Obsidian Plugins Folder**
-
-   - Locate your Obsidian vault directory.
-   - Navigate to `.obsidian/plugins` within your vault.
-   - Create a new folder named `github-repo-notes`.
-   - Copy the following files into this folder:
-
-     - `manifest.json`
-     - `main.js`
-     - `styles.css` (if available)
-
-5. **Enable the Plugin in Obsidian**
-
-   - Open Obsidian.
-   - Go to `Settings` > `Community Plugins`.
-   - Disable `Safe Mode` if it's enabled.
-   - Click on `Installed Plugins` and enable **GitHub Repo Notes Plugin**.
-
 ## Configuration
 
 ### Plugin Settings
@@ -138,8 +84,6 @@ Place this file in your vault at the path specified in the plugin settings.
 
 ```markdown
 ---
-tags:
-  - type/code-repository
 title: "{{repo_name}}"
 created_by: "[[{{owner}}]]"
 license: "{{license}}"
@@ -147,8 +91,6 @@ repository_link: "{{repo_url}}"
 language: "{{language}}"
 default_branch: "{{default_branch}}"
 created_at: "{{created_at}}"
-template_type: Code Repository
-template_version: "1.0"
 ---
 
 # {{repo_name}}
@@ -160,53 +102,8 @@ by [[{{owner}}]]
 > [!summary]
 {{description}}
 
-## Features
 
-- 
-
-## Installation
-
-- 
-
-## Usage
-
-- 
-
-## Contributors
-
-- 
-
-## README
-
-{{readme_content}}
-
-## Known Issues
-
-- 
-
-## Future Development
-
-- 
-
----
-
-# Back Matter
-
-**Source**
-
-- [{{repo_url}}]({{repo_url}})
-
-**References**
-
-- 
-
-**Tasks**
-
-- 
-
-**Questions**
-
-- 
+{{readme_content}} 
 ```
 
 ## Usage
@@ -263,10 +160,6 @@ You can create a new note from a GitHub repository URL using either the ribbon i
   - The repository may not have a README file.
   - The plugin will leave the `{{readme_content}}` placeholder empty if no README is found.
 
-- **Auto-Complete Not Working in Settings**
-
-  - Ensure you've updated the plugin to the latest version.
-  - If issues persist, restart Obsidian.
 
 ## Development
 
@@ -307,15 +200,3 @@ Contributions are welcome! Please open an issue or submit a pull request on GitH
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
----
-
-**Note**: Replace `https://github.com/yourusername/github-repo-notes.git` with the actual URL of your plugin's repository.
-
-**Optional Enhancements**:
-
-- Add screenshots to demonstrate usage (place images in the repository and reference them in the README).
-- Provide more detailed troubleshooting steps based on user feedback.
-- Include a changelog or roadmap section if you plan to update the plugin regularly.
-
-**Important**: Ensure that all placeholders in your template match those used in the plugin code. Test the plugin thoroughly to confirm that it functions as expected.
