@@ -1,131 +1,165 @@
 // textInputSuggest.ts
-import { App } from 'obsidian';
 
-export abstract class TextInputSuggest<T> {
+import { App, ISuggestOwner, Scope } from 'obsidian';
+import { createPopper, Instance as PopperInstance } from '@popperjs/core';
+
+export abstract class TextInputSuggest<T> implements ISuggestOwner<T> {
   protected app: App;
-  protected inputEl: HTMLInputElement;
-  private containerEl: HTMLElement;
+  protected inputEl: HTMLInputElement | HTMLTextAreaElement;
+
+  private scope: Scope;
+  private popper: PopperInstance | null = null;
   private suggestEl: HTMLElement;
   private suggestionItems: HTMLElement[];
   private suggestions: T[];
   private selectedItem: number = -1;
 
-  constructor(app: App, inputEl: HTMLInputElement) {
+  constructor(app: App, inputEl: HTMLInputElement | HTMLTextAreaElement) {
     this.app = app;
     this.inputEl = inputEl;
     this.suggestionItems = [];
-
-    // Create a container element
-    this.containerEl = createDiv('text-input-suggestion-container');
-
-    // Replace the input element's parent with the container
-    if (this.inputEl.parentNode) {
-      this.inputEl.parentNode.replaceChild(this.containerEl, this.inputEl);
-    }
-
-    // Append the input element and suggestion element to the container
-    this.containerEl.appendChild(this.inputEl);
+    this.scope = new Scope();
 
     this.suggestEl = createDiv('suggestion-container');
-    this.containerEl.appendChild(this.suggestEl);
+    this.suggestEl.on('mousedown', '.suggestion-item', this.onSuggestionClick.bind(this));
+    this.suggestEl.on('mousemove', '.suggestion-item', this.onSuggestionMouseover.bind(this));
 
     this.inputEl.addEventListener('input', () => this.onInputChanged());
     this.inputEl.addEventListener('blur', () => this.close());
     this.inputEl.addEventListener('focus', () => this.onInputChanged());
-    this.inputEl.addEventListener('keydown', (event: KeyboardEvent) => this.onKeyDown(event));
+
+    this.scope.register([], 'ArrowUp', (event) => {
+      if (!event.isComposing) {
+        this.changeSelection(-1);
+        return false;
+      }
+    });
+
+    this.scope.register([], 'ArrowDown', (event) => {
+      if (!event.isComposing) {
+        this.changeSelection(1);
+        return false;
+      }
+    });
+
+    this.scope.register([], 'Enter', (event) => {
+      if (!event.isComposing) {
+        this.useSelectedItem(event);
+        return false;
+      }
+    });
+
+    this.scope.register([], 'Escape', (event) => {
+      if (!event.isComposing) {
+        this.close();
+        return false;
+      }
+    });
   }
 
   abstract getSuggestions(inputStr: string): T[];
   abstract renderSuggestion(item: T, el: HTMLElement): void;
   abstract selectSuggestion(item: T): void;
 
-  private onInputChanged(): void {
+  protected onInputChanged(): void {
     const inputStr = this.inputEl.value;
     this.suggestions = this.getSuggestions(inputStr);
-    this.showSuggestions(this.suggestions);
+    if (this.suggestions.length > 0) {
+      this.showSuggestions(this.suggestions);
+    } else {
+      this.close();
+    }
   }
 
   private showSuggestions(suggestions: T[]): void {
-    this.close();
-
-    if (suggestions.length === 0) {
-      return;
-    }
-
-    // Clear previous suggestions
-    this.suggestEl.innerHTML = '';
+    this.suggestEl.empty();
     this.suggestionItems = [];
 
     suggestions.forEach((suggestion, index) => {
       const itemEl = createDiv('suggestion-item');
       this.renderSuggestion(suggestion, itemEl);
-
-      itemEl.addEventListener('mousedown', (event: MouseEvent) => {
-        event.preventDefault();
-        this.selectSuggestion(suggestion);
-        this.close();
-      });
-
       this.suggestEl.appendChild(itemEl);
       this.suggestionItems.push(itemEl);
     });
 
-    // Show the suggestion container
-    this.suggestEl.addClass('is-visible');
+    if (!this.popper) {
+      this.app.keymap.pushScope(this.scope);
+      document.body.appendChild(this.suggestEl);
+
+      this.popper = createPopper(this.inputEl, this.suggestEl, {
+        placement: 'bottom-start',
+        modifiers: [
+          {
+            name: 'sameWidth',
+            enabled: true,
+            fn: ({ state, instance }) => {
+              const targetWidth = `${state.rects.reference.width}px`;
+              if (state.styles.popper.width === targetWidth) {
+                return;
+              }
+              state.styles.popper.width = targetWidth;
+              instance.update();
+            },
+            phase: 'beforeWrite',
+            requires: ['computeStyles'],
+          },
+        ],
+      });
+    } else {
+      this.popper.update();
+    }
 
     this.selectedItem = -1;
   }
 
-  private close(): void {
-    // Hide the suggestion container
-    this.suggestEl.removeClass('is-visible');
+  protected close(): void {
+    if (this.popper) {
+      this.app.keymap.popScope(this.scope);
+      this.popper.destroy();
+      this.popper = null;
+    }
+    this.suggestEl.detach();
     this.suggestionItems = [];
     this.selectedItem = -1;
   }
 
-  private onKeyDown(event: KeyboardEvent): void {
-    if (!this.suggestions || this.suggestions.length === 0) {
-      return;
-    }
+  private onSuggestionClick(event: MouseEvent, el: HTMLElement): void {
+    event.preventDefault();
+    const item = this.suggestionItems.indexOf(el);
+    this.setSelectedItem(item);
+    this.useSelectedItem(event);
+  }
 
-    switch (event.key) {
-      case 'ArrowUp':
-        event.preventDefault();
-        this.changeSelection(-1);
-        break;
-      case 'ArrowDown':
-        event.preventDefault();
-        this.changeSelection(1);
-        break;
-      case 'Enter':
-        event.preventDefault();
-        if (this.selectedItem >= 0 && this.selectedItem < this.suggestions.length) {
-          this.selectSuggestion(this.suggestions[this.selectedItem]);
-          this.close();
-        }
-        break;
-      case 'Escape':
-        event.preventDefault();
-        this.close();
-        break;
+  private onSuggestionMouseover(event: MouseEvent, el: HTMLElement): void {
+    const item = this.suggestionItems.indexOf(el);
+    this.setSelectedItem(item);
+  }
+
+  private setSelectedItem(index: number): void {
+    if (this.selectedItem >= 0 && this.selectedItem < this.suggestionItems.length) {
+      this.suggestionItems[this.selectedItem].removeClass('is-selected');
+    }
+    this.selectedItem = index;
+    if (this.selectedItem >= 0 && this.suggestionItems.length) {
+      this.suggestionItems[this.selectedItem].addClass('is-selected');
+      this.suggestionItems[this.selectedItem].scrollIntoView(false);
     }
   }
 
   private changeSelection(direction: number): void {
-    if (this.selectedItem >= 0 && this.selectedItem < this.suggestionItems.length) {
-      this.suggestionItems[this.selectedItem].removeClass('is-selected');
+    let newIndex = this.selectedItem + direction;
+    if (newIndex < 0) {
+      newIndex = this.suggestionItems.length - 1;
+    } else if (newIndex >= this.suggestionItems.length) {
+      newIndex = 0;
     }
+    this.setSelectedItem(newIndex);
+  }
 
-    this.selectedItem += direction;
-
-    if (this.selectedItem < 0) {
-      this.selectedItem = this.suggestionItems.length - 1;
-    } else if (this.selectedItem >= this.suggestionItems.length) {
-      this.selectedItem = 0;
-    }
-
-    if (this.selectedItem >= 0 && this.selectedItem < this.suggestionItems.length) {
-      this.suggestionItems[this.selectedItem].addClass('is-selected');
+  private useSelectedItem(event: MouseEvent | KeyboardEvent): void {
+    if (this.selectedItem >= 0 && this.selectedItem < this.suggestions.length) {
+      this.selectSuggestion(this.suggestions[this.selectedItem]);
+      this.close();
     }
   }
 }

@@ -1,24 +1,25 @@
 // folderSuggest.ts
-import { TFolder } from 'obsidian';
+
+import { App, TFolder } from 'obsidian';
 import { TextInputSuggest } from './textInputSuggest';
 
 export class FolderSuggest extends TextInputSuggest<TFolder> {
+  constructor(app: App, inputEl: HTMLInputElement) {
+    super(app, inputEl);
+  }
+
   getSuggestions(inputStr: string): TFolder[] {
     const folders: TFolder[] = [];
-    const lowerInputStr = inputStr.toLowerCase();
+    const lowerCaseInputStr = inputStr.toLowerCase();
 
-    const traverseFolders = (folder: TFolder) => {
-      if (folder.path.toLowerCase().includes(lowerInputStr)) {
-        folders.push(folder);
+    this.app.vault.getAllLoadedFiles().forEach((file) => {
+      if (
+        file instanceof TFolder &&
+        file.path.toLowerCase().includes(lowerCaseInputStr)
+      ) {
+        folders.push(file);
       }
-      for (const child of folder.children) {
-        if (child instanceof TFolder) {
-          traverseFolders(child);
-        }
-      }
-    };
-
-    traverseFolders(this.app.vault.getRoot());
+    });
 
     return folders;
   }
@@ -30,5 +31,6 @@ export class FolderSuggest extends TextInputSuggest<TFolder> {
   selectSuggestion(folder: TFolder): void {
     this.inputEl.value = folder.path;
     this.inputEl.trigger('input');
+    this.close(); // Now accessible due to protected visibility
   }
 }

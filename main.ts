@@ -1,11 +1,9 @@
 // main.ts
 
 import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import axios from 'axios';
 import { GitHubRepoNotesSettings, DEFAULT_SETTINGS } from './settings';
 import { RepoUrlModal } from './modal';
-import { FolderSuggest } from './folderSuggest';
-import { FileSuggest } from './fileSuggest';
+import { TFolder, TFile } from 'obsidian'
 
 export default class GitHubRepoNotesPlugin extends Plugin {
   settings: GitHubRepoNotesSettings;
@@ -82,16 +80,17 @@ class GitHubRepoNotesSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('New File Location')
       .setDesc('Directory where new notes will be created.')
-      .addText((text) => {
-        text
-          .setPlaceholder('Select folder')
+      .addDropdown((dropdown) => {
+        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder);
+        folders.forEach(folder => {
+          dropdown.addOption(folder.path, folder.path);
+        });
+        dropdown
           .setValue(this.plugin.settings.newFileLocation)
           .onChange(async (value) => {
             this.plugin.settings.newFileLocation = value;
             await this.plugin.saveSettings();
           });
-        // Attach FolderSuggest to the input field
-        new FolderSuggest(this.app, text.inputEl);
       });
 
     new Setting(containerEl)
@@ -112,16 +111,20 @@ class GitHubRepoNotesSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('Template File')
       .setDesc('Template file to use for new notes.')
-      .addText((text) => {
-        text
-          .setPlaceholder('Select template file')
+      .addDropdown((dropdown) => {
+        const templateFolder = this.app.vault.getAbstractFileByPath('template-folder-path');
+        if (templateFolder instanceof TFolder) {
+          const files = templateFolder.children.filter(file => file instanceof TFile);
+          files.forEach(file => {
+            dropdown.addOption(file.path, file.path);
+          });
+        }
+        dropdown
           .setValue(this.plugin.settings.templateFile)
           .onChange(async (value) => {
             this.plugin.settings.templateFile = value;
             await this.plugin.saveSettings();
           });
-        // Attach FileSuggest to the input field
-        new FileSuggest(this.app, text.inputEl);
       });
 
     new Setting(containerEl)
