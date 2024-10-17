@@ -3,7 +3,8 @@
 import { App, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { GitHubRepoNotesSettings, DEFAULT_SETTINGS } from './settings';
 import { RepoUrlModal } from './modal';
-import { TFolder, TFile } from 'obsidian'
+import { FolderSuggest } from 'FolderSuggester';
+import { FileSuggest } from 'FileSuggester'
 
 export default class GitHubRepoNotesPlugin extends Plugin {
   settings: GitHubRepoNotesSettings;
@@ -80,18 +81,17 @@ class GitHubRepoNotesSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName('New File Location')
       .setDesc('Directory where new notes will be created.')
-      .addDropdown((dropdown) => {
-        const folders = this.app.vault.getAllLoadedFiles().filter(file => file instanceof TFolder);
-        folders.forEach(folder => {
-          dropdown.addOption(folder.path, folder.path);
-        });
-        dropdown
-          .setValue(this.plugin.settings.newFileLocation)
-          .onChange(async (value) => {
-            this.plugin.settings.newFileLocation = value;
-            await this.plugin.saveSettings();
-          });
-      });
+      .addSearch((cb) => {
+        new FolderSuggest(cb.inputEl);
+        cb.setPlaceholder("Example: folder1/folder2")
+            .setValue(this.plugin.settings.newFileLocation)
+            .onChange((new_folder) => {
+                this.plugin.settings.newFileLocation = new_folder;
+                this.plugin.saveSettings();
+            });
+        // @ts-ignore
+        cb.containerEl.addClass("templater_search");
+    });
 
     new Setting(containerEl)
       .setName('New File Name')
@@ -110,21 +110,17 @@ class GitHubRepoNotesSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName('Template File')
-      .setDesc('Template file to use for new notes.')
-      .addDropdown((dropdown) => {
-        const templateFolder = this.app.vault.getAbstractFileByPath('template-folder-path');
-        if (templateFolder instanceof TFolder) {
-          const files = templateFolder.children.filter(file => file instanceof TFile);
-          files.forEach(file => {
-            dropdown.addOption(file.path, file.path);
-          });
-        }
-        dropdown
+      .setDesc('Select the template file to use for new notes.')
+      .addSearch((cb) => {
+        new FileSuggest(cb.inputEl);
+        cb.setPlaceholder("Example: templates/template1.md")
           .setValue(this.plugin.settings.templateFile)
-          .onChange(async (value) => {
-            this.plugin.settings.templateFile = value;
-            await this.plugin.saveSettings();
+          .onChange((new_template) => {
+            this.plugin.settings.templateFile = new_template;
+            this.plugin.saveSettings();
           });
+        // @ts-ignore
+        cb.containerEl.addClass("templater_search");
       });
 
     new Setting(containerEl)
