@@ -1,7 +1,6 @@
 // modal.ts
 
-import { App, Modal, Notice } from 'obsidian';
-import axios from 'axios';
+import { App, Modal, Notice, requestUrl } from 'obsidian';
 import GitHubRepoNotesPlugin from './main';
 import { GitHubRepoNotesSettings } from './settings';
 
@@ -21,7 +20,7 @@ export class RepoUrlModal extends Modal {
     contentEl.createEl('h2', { text: 'Enter GitHub Repository URL' });
 
     const inputEl = contentEl.createEl('input', { type: 'text' });
-    inputEl.style.width = '100%';
+    inputEl.addClass('github-repo-notes-input');
 
     // Add an event listener for the Enter key
     inputEl.addEventListener('keydown', async (event: KeyboardEvent) => {
@@ -32,7 +31,7 @@ export class RepoUrlModal extends Modal {
     });
 
     const submitBtn = contentEl.createEl('button', { text: 'Create Note' });
-    submitBtn.style.marginTop = '10px';
+    submitBtn.addClass('github-repo-notes-submit-btn');
 
     submitBtn.addEventListener('click', async () => {
       await this.handleSubmit(inputEl.value.trim());
@@ -80,14 +79,14 @@ export class RepoUrlModal extends Modal {
 
     const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
 
-    const headers: any = {};
+    const headers: Record<string, string> = {};
     if (this.settings.githubToken) {
       headers['Authorization'] = `token ${this.settings.githubToken}`;
     }
 
     try {
-      const response = await axios.get(apiUrl, { headers });
-      const repoData = response.data;
+      const response = await requestUrl({ url: apiUrl, headers });
+      const repoData = JSON.parse(response.text);
 
       // Fetch the README content
       const readmeContent = await this.fetchReadmeContent(owner, repo, headers);
@@ -99,13 +98,14 @@ export class RepoUrlModal extends Modal {
     }
   }
 
-  async fetchReadmeContent(owner: string, repo: string, headers: any): Promise<string> {
+  async fetchReadmeContent(owner: string, repo: string, headers: Record<string, string>): Promise<string> {
     const readmeApiUrl = `https://api.github.com/repos/${owner}/${repo}/readme`;
 
     try {
-      const response = await axios.get(readmeApiUrl, { headers });
-      const content = response.data.content;
-      const encoding = response.data.encoding;
+      const response = await requestUrl({ url: readmeApiUrl, headers });
+      const data = JSON.parse(response.text);
+      const content = data.content;
+      const encoding = data.encoding;
 
       if (encoding === 'base64' && content) {
         // Decode the Base64 content using atob
@@ -190,6 +190,7 @@ export class RepoUrlModal extends Modal {
       const overwriteButton = buttonContainer.createEl('button', { text: 'Overwrite' });
       const cancelButton = buttonContainer.createEl('button', { text: 'Cancel' });
 
+      overwriteButton.addClass('mod-cta');
       overwriteButton.addEventListener('click', () => {
         resolve(true);
         modal.close();

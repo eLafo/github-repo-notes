@@ -4,6 +4,7 @@ import { App } from 'obsidian';
 export abstract class TextInputSuggest<T> {
   protected app: App;
   protected inputEl: HTMLInputElement;
+  private containerEl: HTMLElement;
   private suggestEl: HTMLElement;
   private suggestionItems: HTMLElement[];
   private suggestions: T[];
@@ -12,8 +13,21 @@ export abstract class TextInputSuggest<T> {
   constructor(app: App, inputEl: HTMLInputElement) {
     this.app = app;
     this.inputEl = inputEl;
-    this.suggestEl = createDiv('suggestion-container');
     this.suggestionItems = [];
+
+    // Create a container element
+    this.containerEl = createDiv('text-input-suggestion-container');
+
+    // Replace the input element's parent with the container
+    if (this.inputEl.parentNode) {
+      this.inputEl.parentNode.replaceChild(this.containerEl, this.inputEl);
+    }
+
+    // Append the input element and suggestion element to the container
+    this.containerEl.appendChild(this.inputEl);
+
+    this.suggestEl = createDiv('suggestion-container');
+    this.containerEl.appendChild(this.suggestEl);
 
     this.inputEl.addEventListener('input', () => this.onInputChanged());
     this.inputEl.addEventListener('blur', () => this.close());
@@ -38,7 +52,8 @@ export abstract class TextInputSuggest<T> {
       return;
     }
 
-    this.suggestEl = createDiv('suggestion-container');
+    // Clear previous suggestions
+    this.suggestEl.innerHTML = '';
     this.suggestionItems = [];
 
     suggestions.forEach((suggestion, index) => {
@@ -55,22 +70,17 @@ export abstract class TextInputSuggest<T> {
       this.suggestionItems.push(itemEl);
     });
 
-    document.body.appendChild(this.suggestEl);
-    const { left, bottom } = this.inputEl.getBoundingClientRect();
-    this.suggestEl.style.position = 'absolute';
-    this.suggestEl.style.left = `${left}px`;
-    this.suggestEl.style.top = `${bottom}px`;
-    this.suggestEl.style.width = `${this.inputEl.offsetWidth}px`;
+    // Show the suggestion container
+    this.suggestEl.addClass('is-visible');
 
     this.selectedItem = -1;
   }
 
   private close(): void {
-    if (this.suggestEl && this.suggestEl.parentNode) {
-      this.suggestEl.parentNode.removeChild(this.suggestEl);
-      this.suggestionItems = [];
-      this.selectedItem = -1;
-    }
+    // Hide the suggestion container
+    this.suggestEl.removeClass('is-visible');
+    this.suggestionItems = [];
+    this.selectedItem = -1;
   }
 
   private onKeyDown(event: KeyboardEvent): void {

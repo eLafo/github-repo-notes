@@ -1,21 +1,88 @@
 /* styles.css */
 
+/* Container wrapping the input and suggestion list */
+.github-repo-notes-suggestion-container {
+  position: relative;
+}
+
+/* Styles for the modal input field */
+.github-repo-notes-input {
+  width: 100%;
+}
+
+/* Styles for the submit button */
+.github-repo-notes-submit-btn {
+  margin-top: 10px;
+}
+
+/* Styles for the suggestion container */
+.github-repo-notes-suggest {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  display: none;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--border-radius);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+/* Show the suggestion list when 'is-visible' class is added */
+.github-repo-notes-suggest.is-visible {
+  display: block;
+}
+
+/* Styles for suggestion items */
+.suggestion-item {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.suggestion-item.is-selected {
+  background-color: var(--background-modifier-selected);
+}
+
+/* styles.css */
+
+/* Container wrapping the input and suggestion list */
+.text-input-suggestion-container {
+  position: relative;
+}
+
+/* Styles for the submit button */
+.github-repo-notes-submit-btn {
+  margin-top: 10px;
+}
+
+/* Styles for the suggestion container */
 .suggestion-container {
-    background-color: var(--background-primary);
-    border: 1px solid var(--background-modifier-border);
-    border-radius: var(--border-radius);
-    max-height: 200px;
-    overflow-y: auto;
-    position: absolute;
-    z-index: 1000;
-  }
-  
-  .suggestion-item {
-    padding: 8px 10px;
-    cursor: pointer;
-  }
-  
-  .suggestion-item.is-selected {
-    background-color: var(--background-modifier-selected);
-  }
-  
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  display: none;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--border-radius);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+/* Show the suggestion list when 'is-visible' class is added */
+.suggestion-container.is-visible {
+  display: block;
+}
+
+/* Styles for suggestion items */
+.suggestion-item {
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.suggestion-item.is-selected {
+  background-color: var(--background-modifier-selected);
+}
